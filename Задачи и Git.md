@@ -16,6 +16,7 @@
 1. Перейти в `develop`
 2. `git pull`
 3. `git checkout -b my-awesome-branch`, где `my-awesome-branch` — имя ветки для задания
+
 Или для пункта **3** можно использовать инструменты вроде `git flow`
 
 **Для хотфикса**
@@ -24,6 +25,7 @@
 3. Перейти в `master`
 4. `git pull`
 5. `git checkout -b my-awesome-hotfix-branch`, где `my-awesome-hotfix-branch` — имя ветки для задания
+
 Или для пункта **5** можно использовать инструменты вроде `git flow`
 
 ### Для задачи написаны Юнит-тесты
