@@ -1,27 +1,79 @@
-# 1. Именование экшенов через camelCase
+# Основные
+## Именование экшенов через camelCase
 
-**Зачем**: для единообразия кода.
+**Почему**: чтобы именование в коде было единообразным.
 
-Хорошо
-```
+**Правильно**
+```js
 dispatch(currentUserAction.setUser(profile));
 
 dispatch(currentUserAction.checkPassword(password));
 ```
 
-Плохо
-```
+**Неправильно**
+```js
 dispatch(currentUserAction.set_user(profile));
 
 dispatch(currentUserAction.check_password(password));
 ```
 
-# 2. Пишем dispatch вместо this.props.dispatch
+## Данные, переданные в экшен, записываем в payload
 
-**Зачем**: если у нас есть другие пропсы, мы все равно их получаем с помощью деструктуризации. Можно деструктурировать и диспатч. Тогда в момент вызова код будет занимать меньше места.
+**Почему**: единообразие кода. Все данные будут передаваться в одном объекте, а не будут разрозненно находиться в экшене. Отсутствие каких-то данных или передача их в другом порядке (теоретически) не приведет к ошибке.
 
-Хорошо
+**Правильно**
+```js
+// SomeComponent.jsx
+const userInfo = {
+  userId,
+  userName,
+  userEmail,
+  userRole,
+  statisticAccess
+};
+dispatch(usersActions.editUser(userInfo));
+
+// user.js
+editUser(data) {
+  return {
+    type: TYPES.EDIT_USER,
+    payload: data
+  }
+};
 ```
+
+**Неправильно**
+```js
+// SomeComponent.jsx
+dispatch(
+  usersActions.editUser(
+    userId,
+    userName,
+    userEmail,
+    userRole,
+    statisticAccess
+  ));
+
+// user.js
+editUser(userId, userName, userEmail, userRole, statisticAccess) {
+  return {
+    type: TYPES.EDIT_USER,
+    userId,
+    userName,
+    userEmail,
+    userRole,
+    statisticAccess
+  }
+}
+```
+
+# Дополнительные
+## Пишется dispatch вместо this.props.dispatch
+
+**Почему**: если у нас есть другие пропсы, мы все равно их получаем с помощью деструктуризации. Можно деструктурировать и диспатч. Тогда в момент вызова код будет занимать меньше места.
+
+**Правильно**
+```js
 const { dispatch, profile } = this.props;
 dispatch(currentUserAction.setUser(profile));
 
@@ -29,70 +81,44 @@ const { dispatch, password } = this.props;
 dispatch(currentUserAction.checkPassword(password));
 ```
 
-Не очень хорошо
-```
+**Неправильно**
+```js
 this.props.dispatch(currentUserAction.setUser(this.props.profile));
 
 this.props.dispatch(currentUserAction.checkPassword(this.props.password));
 ```
 
-# 3. Данные, переданные в экшен, записываем в payload
+## Не вызывать друг за другом несколько диспатчей
 
-**Зачем**: единообразие кода. Все данные будут передаваться в одном объекте, а не будут разрозненно находиться в экшене
+**Почему**: каждый диспатч дергает все экшены с переданным именем, что чревато лишними перерисовками. Если нужно произвести одновременно несколько действий в разных частях стора, лучше создать под это новый экшен в этих частях и вызывать только один диспатч с этим экшеном.
 
-Хорошо
-```
-check_token(platform, token) {
-  return { 
-    type: TYPES.CHECK_TOKEN,
-    payload: {
-      platform,
-      token
-    }
-  }
-},
+**Правильно**
+```js
+dispatch(doSmthAndSmthMore(data));
 ```
 
-Не очень хорошо
-```
-edit_user(userId, userName, userEmail, userRole, statisticAccess, chatAccess, faqAccess, mailingAccess, statesAccess, paymentsAccess, constructAccess) {
-  return { 
-    type: TYPES.EDIT_USER, 
-    userId, 
-    userName, 
-    userEmail, 
-    userRole, 
-    statisticAccess, 
-    chatAccess, 
-    faqAccess, 
-    mailingAccess, 
-    statesAccess, 
-    paymentsAccess, 
-    constructAccess 
-  }
-}
+**Неправильно**
+```js
+dispatch(doSmth(data));
+dispatch(doSmthMore());
 ```
 
-# 4. Не вызывать более одного диспатча единовременно (создаем новый?)
+## Если название экшена очень длинное, переносим на новую строку(?)
 
-**Зачем**: каждый диспатч - это новая перерисовка. Нужно по возможности уменьшать их количество.
+**Почему**: чтобы легче было читать код
 
-# 5. если название экшена очень длинное, переносим на новую строку (обсуждаемо)
-
-**Зачем**: чтобы легче было читать код.
-
-Хорошо
-```
+**Правильно**
+```js
 dispatch(
-  screenActions.change_all_screens_visibility(
-    Object.keys(screens), 
-    bot._id, 
+  screenActions.changeAllScreensVisibility(
+    screens, 
+    id, 
     value
   )
-)
+);
 ```
 
-Не очень хорошо
-```
-dispatch(screenActions.change_all_screens_visibility(Object.keys(screens), bot._id, value))
+**Неправильно**
+```js
+dispatch(screenActions.changeAllScreensVisibility(screens, id, value));
 ```
